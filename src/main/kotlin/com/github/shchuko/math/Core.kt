@@ -16,6 +16,11 @@ private infix fun Double.ge(other: Double): Boolean = this > other || eq(other)
 private fun Double.sqr() = this * this
 
 /* Vector 3D and Point 3D commons */
+
+enum class Coordinate {
+    X, Y, Z
+}
+
 fun Triple<Double, Double, Double>.x(): Double = first
 fun Triple<Double, Double, Double>.y(): Double = second
 fun Triple<Double, Double, Double>.z(): Double = third
@@ -30,11 +35,10 @@ operator fun Triple<Double, Double, Double>.get(i: Int): Double = when (i) {
     else -> throw IllegalArgumentException()
 }
 
-fun Triple<Double, Double, Double>.to2d(iIgnore: Int): Pair<Double, Double> = when (iIgnore) {
-    0 -> Pair(second, third)
-    1 -> Pair(first, third)
-    2 -> Pair(first, second)
-    else -> throw IllegalArgumentException()
+fun Triple<Double, Double, Double>.to2d(ignore: Coordinate): Pair<Double, Double> = when (ignore) {
+    Coordinate.X -> Pair(second, third)
+    Coordinate.Y -> Pair(first, third)
+    Coordinate.Z -> Pair(first, second)
 }
 
 operator fun Triple<Double, Double, Double>.unaryPlus(): Triple<Double, Double, Double> = this
@@ -92,11 +96,10 @@ operator fun Pair<Double, Double>.get(i: Int): Double = when (i) {
     else -> throw IllegalArgumentException()
 }
 
-fun Pair<Double, Double>.to3d(iZeroed: Int): Triple<Double, Double, Double> = when (iZeroed) {
-    0 -> Triple(0.0, first, second)
-    1 -> Triple(first, 0.0, second)
-    2 -> Triple(first, second, 0.0)
-    else -> throw IllegalArgumentException()
+fun Pair<Double, Double>.to3d(zeroed: Coordinate): Triple<Double, Double, Double> = when (zeroed) {
+    Coordinate.X -> Triple(0.0, first, second)
+    Coordinate.Y -> Triple(first, 0.0, second)
+    Coordinate.Z -> Triple(first, second, 0.0)
 }
 
 operator fun Pair<Double, Double>.unaryPlus(): Pair<Double, Double> = this
