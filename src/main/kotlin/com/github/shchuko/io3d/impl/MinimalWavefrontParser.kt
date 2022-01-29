@@ -12,10 +12,9 @@ import java.util.stream.Stream
 class MinimalWavefrontParser(
     private val stream: InputStream, private val validateNormals: Boolean = false
 ) : Parser {
-    private val scene: ParseContext by lazy { parse() }
-    private var lineCounter = 0
+    override val parsedScene: Scene3D by lazy { parse() }
 
-    override fun getResult(): Scene3D = scene
+    private var lineCounter = 0
 
     private fun parse(): ParseContext {
         val parsed: ParseContext
@@ -27,12 +26,9 @@ class MinimalWavefrontParser(
             throw WavefrontParseException(e)
         }
 
-        // Finalize faces data
-        parsed.getFaces()
-
         // Validate normals if needed
         if (validateNormals) { //  && parsed.getFaces().any { !it.isNormalCorrect() }
-            for (it in parsed.getFaces()) {
+            for (it in parsed.faces) {
                 if (!it.isNormalCorrect()) {
                     throw WavefrontParseException("File contains invalid faces normals")
                 }
@@ -66,11 +62,11 @@ class MinimalWavefrontParser(
     }
 
     private fun parseVertex(tokens: List<String>, context: ParseContext) =
-        context.verticesStorage.add(parseCoordinates(tokens))
+        context.vertices.add(parseCoordinates(tokens))
 
 
     private fun parseNormal(tokens: List<String>, context: ParseContext) {
-        context.normalsStorage.add(parseCoordinates(tokens))
+        context.normals.add(parseCoordinates(tokens))
     }
 
     private fun parseFace(tokens: List<String>, context: ParseContext) {
@@ -85,7 +81,7 @@ class MinimalWavefrontParser(
     private fun getFaceNormalIndex(tokens: List<String>, context: ParseContext): Int {
         var normalIndex = Int.MIN_VALUE
 
-        if (context.normalsStorage.isEmpty()) {
+        if (context.normals.isEmpty()) {
             return normalIndex
         }
 
@@ -97,13 +93,13 @@ class MinimalWavefrontParser(
                 throw WavefrontParseException("malformed face normal index $faceTokenSplit[2]", e)
             }
 
-            if (normalIndex < 0 || normalIndex > context.normalsStorage.size) {
-                throw WavefrontParseException("normal index ${normalIndex + 1} is out of range [1..${context.normalsStorage.size}]")
+            if (normalIndex < 0 || normalIndex > context.normals.size) {
+                throw WavefrontParseException("normal index ${normalIndex + 1} is out of range [1..${context.normals.size}]")
             }
         } else {
             context.facesMetadata.forEach { it.normalIndex = Int.MIN_VALUE }
             // Drop parsed normals data if there is no association with faces
-            context.normalsStorage.clear()
+            context.normals.clear()
         }
 
         return normalIndex
@@ -117,9 +113,9 @@ class MinimalWavefrontParser(
             throw WavefrontParseException("unable context parse vertex index: ${e.message}", e)
         }
 
-        verticesIndexes.stream().forEach {
-            if (it < 0 || it >= context.verticesStorage.size) {
-                throw WavefrontParseException("vertex index ${it + 1} is out of range [1..${context.normalsStorage.size}]")
+        verticesIndexes.forEach {
+            if (it < 0 || it >= context.vertices.size) {
+                throw WavefrontParseException("vertex index ${it + 1} is out of range [1..${context.normals.size}]")
             }
         }
         return verticesIndexes
@@ -141,18 +137,10 @@ class MinimalWavefrontParser(
     }
 
     private class ParseContext : Scene3D() {
-        val verticesStorage: MutableList<Point3D> = ArrayList()
-        val normalsStorage: MutableList<Vector3D> = ArrayList()
+        override val vertices: MutableList<Point3D> = ArrayList()
+        override val normals: MutableList<Vector3D> = ArrayList()
         val facesMetadata: MutableList<FaceMetadata> = ArrayList()
-        val facesStorage: List<Face> by lazy { faceMetadataToFaces() }
-
-        override fun getVertices(): List<Point3D> = verticesStorage
-        override fun getNormals(): List<Vector3D> = normalsStorage
-        override fun getFaces(): List<Face> = facesStorage
-
-        private fun faceMetadataToFaces(): List<Face> =
-            facesMetadata.map { Face(it.verticesIndexes, it.normalIndex) }.toList()
-
+        override val faces: List<Face> by lazy { facesMetadata.map { Face(it.verticesIndexes, it.normalIndex) } }
 
         data class FaceMetadata(val verticesIndexes: List<Int>, var normalIndex: Int)
     }

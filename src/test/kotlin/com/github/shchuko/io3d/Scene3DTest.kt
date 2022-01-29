@@ -11,16 +11,16 @@ internal class Scene3DFaceTest {
     @Test
     fun `test lazy initialization`() {
         val scene3D = object : Scene3D() {
-            override fun getVertices() = vertices
-            override fun getNormals() = goodNormals
-            override fun getFaces() =
+            override val vertices: List<Point3D> = sceneVertices
+            override val normals: List<Vector3D> = goodNormals
+            override val faces: List<Face> =
                 (0 until facesNumber).map { Face(facesVerticesLists[it], normalIndexesFilled[it]) }
         }
 
 
-        assertEquals(facesNumber, scene3D.getFaces().size)
+        assertEquals(facesNumber, scene3D.faces.size)
         for (faceIndex in 0 until facesNumber) {
-            val face = scene3D.getFaces()[faceIndex]
+            val face = scene3D.faces[faceIndex]
 
             // Checking normal initialization
             val expectedNormal = goodNormals[normalIndexesFilled[faceIndex]]
@@ -31,7 +31,7 @@ internal class Scene3DFaceTest {
             assertEquals(facesVerticesLists[faceIndex].size, face.vertices.size)
             for (i in face.vertices.indices) {
                 val vertexIndex = facesVerticesLists[faceIndex][i]
-                assertSame(vertices[vertexIndex], face.vertices[i])
+                assertSame(sceneVertices[vertexIndex], face.vertices[i])
             }
         }
     }
@@ -39,21 +39,17 @@ internal class Scene3DFaceTest {
     @Test
     fun `test normal calculation from vertices`() {
         val scene3D = object : Scene3D() {
-            override fun getVertices() = vertices
-            override fun getNormals() = goodNormals
-            override fun getFaces() =
-                (0 until facesNumber).map {
-                    Face(
-                        facesVerticesLists[it],
-                        normalsIndexesUnknown[it]
-                    )
-                }
+            override val vertices: List<Point3D> = sceneVertices
+            override val normals: List<Vector3D> = goodNormals
+            override val faces: List<Face> = (0 until facesNumber).map {
+                Face(facesVerticesLists[it], normalsIndexesUnknown[it])
+            }
         }
 
 
-        assertEquals(facesNumber, scene3D.getFaces().size)
+        assertEquals(facesNumber, scene3D.faces.size)
         for (faceIndex in 0 until facesNumber) {
-            val face = scene3D.getFaces()[faceIndex]
+            val face = scene3D.faces[faceIndex]
 
             // Checking normal initialization
             val expectedNormal = goodNormals[normalIndexesFilled[faceIndex]]
@@ -67,30 +63,30 @@ internal class Scene3DFaceTest {
     @Test
     fun `test face detects bad normal`() {
         val sceneWithGoodNormals = object : Scene3D() {
-            override fun getVertices() = vertices
-            override fun getNormals() = goodNormals
-            override fun getFaces() =
+            override val vertices: List<Point3D> = sceneVertices
+            override val normals: List<Vector3D> = goodNormals
+            override val faces: List<Face> =
                 (0 until facesNumber).map { Face(facesVerticesLists[it], normalIndexesFilled[it]) }
         }
 
         val sceneWithBadNormals = object : Scene3D() {
-            override fun getVertices() = vertices
-            override fun getNormals() = badNormals
-            override fun getFaces() =
+            override val vertices: List<Point3D> = sceneVertices
+            override val normals: List<Vector3D> = badNormals
+            override val faces: List<Face> =
                 (0 until facesNumber).map { Face(facesVerticesLists[it], normalIndexesFilled[it]) }
         }
 
-        for (face in sceneWithGoodNormals.getFaces()) {
+        for (face in sceneWithGoodNormals.faces) {
             assertTrue(face.isNormalCorrect())
         }
 
-        for (face in sceneWithBadNormals.getFaces()) {
+        for (face in sceneWithBadNormals.faces) {
             assertFalse(face.isNormalCorrect())
         }
     }
 
     companion object {
-        private val vertices = listOf(
+        private val sceneVertices = listOf(
             Point3D(0.767913, 1.533895, -0.239739),
             Point3D(1.473563, -0.223683, -0.882370),
             Point3D(0.350720, 0.716633, 1.537346),
