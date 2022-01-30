@@ -11,60 +11,68 @@ internal class MinimalWavefrontParserTest {
 
     @Test
     fun `test valid wavefront full`() {
-        val actual = MinimalWavefrontParser(GOOD_WAVEFRONT.byteInputStream(), true).parsedScene
+        val parser = MinimalWavefrontParser(GOOD_WAVEFRONT.byteInputStream(), true)
+        parser.parse()
+
+        val actual = parser.parsedScene
         validateScene(ValidWavefrontScene, actual, false)
     }
 
     @Test
     fun `test valid wavefront no vt`() {
-        val actual =
-            MinimalWavefrontParser(GOOD_WAVEFRONT_NO_VT.byteInputStream(), true).parsedScene
+        val parser = MinimalWavefrontParser(GOOD_WAVEFRONT_NO_VT.byteInputStream(), true)
+        parser.parse()
+
+        val actual = parser.parsedScene
         validateScene(ValidWavefrontScene, actual, false)
     }
 
     @Test
     fun `test valid wavefront no vn`() {
-        val actual =
-            MinimalWavefrontParser(GOOD_WAVEFRONT_NO_VN.byteInputStream(), true).parsedScene
+        val parser = MinimalWavefrontParser(GOOD_WAVEFRONT_NO_VN.byteInputStream(), true)
+        parser.parse()
+
+        val actual = parser.parsedScene
         validateScene(ValidWavefrontScene, actual, true)
     }
 
     @Test
     fun `test valid wavefront no vt no vn`() {
-        val actual =
-            MinimalWavefrontParser(GOOD_WAVEFRONT_NO_VT_NO_VN.byteInputStream(), true).parsedScene
+        val parser = MinimalWavefrontParser(GOOD_WAVEFRONT_NO_VT_NO_VN.byteInputStream(), true)
+        parser.parse()
+        val actual = parser.parsedScene
         validateScene(ValidWavefrontScene, actual, true)
     }
 
     @Test
     fun `test wavefront invalid normals throws`() {
         // Ignore invalid normals
-        MinimalWavefrontParser(GOOD_WAVEFRONT_INVALID_NORMALS.byteInputStream(), false).parsedScene
+        MinimalWavefrontParser(GOOD_WAVEFRONT_INVALID_NORMALS.byteInputStream(), false).parse()
 
         // Validate normals
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(GOOD_WAVEFRONT_INVALID_NORMALS.byteInputStream(), true).parsedScene
+            MinimalWavefrontParser(GOOD_WAVEFRONT_INVALID_NORMALS.byteInputStream(), true).parse()
         }
     }
 
     @Test
     fun `test malformed wavefront bad v coord`() {
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_V_COORDINATE.byteInputStream(), false).parsedScene
+            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_V_COORDINATE.byteInputStream(), false).parse()
         }
     }
 
     @Test
     fun `test malformed wavefront bad n coord`() {
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_N_COORDINATE.byteInputStream(), false).parsedScene
+            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_N_COORDINATE.byteInputStream(), false).parse()
         }
     }
 
     @Test
     fun `test malformed wavefront bad v coord number`() {
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(MALFORMED_WAVEFRONT_WRONG_V_COORDINATES_NUMBER.byteInputStream(), false).parsedScene
+            MinimalWavefrontParser(MALFORMED_WAVEFRONT_WRONG_V_COORDINATES_NUMBER.byteInputStream(), false).parse()
         }
     }
 
@@ -74,14 +82,14 @@ internal class MinimalWavefrontParserTest {
             MinimalWavefrontParser(
                 MALFORMED_WAVEFRONT_WRONG_V_COORDINATES_NUMBER_2.byteInputStream(),
                 false
-            ).parsedScene
+            ).parse()
         }
     }
 
     @Test
     fun `test malformed wavefront bad n coord number`() {
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(MALFORMED_WAVEFRONT_WRONG_N_COORDINATES_NUMBER.byteInputStream(), false).parsedScene
+            MinimalWavefrontParser(MALFORMED_WAVEFRONT_WRONG_N_COORDINATES_NUMBER.byteInputStream(), false).parse()
         }
     }
 
@@ -91,14 +99,14 @@ internal class MinimalWavefrontParserTest {
             MinimalWavefrontParser(
                 MALFORMED_WAVEFRONT_WRONG_N_COORDINATES_NUMBER_2.byteInputStream(),
                 false
-            ).parsedScene
+            ).parse()
         }
     }
 
     @Test
     fun `test malformed wavefront bad face normal index`() {
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_FACE_NORMAL_INDEX.byteInputStream(), false).parsedScene
+            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_FACE_NORMAL_INDEX.byteInputStream(), false).parse()
         }
     }
 
@@ -108,7 +116,7 @@ internal class MinimalWavefrontParserTest {
             MinimalWavefrontParser(
                 MALFORMED_WAVEFRONT_FACE_NORMAL_INDEX_OUT_OF_RANGE.byteInputStream(),
                 false
-            ).parsedScene
+            ).parse()
         }
     }
 
@@ -118,21 +126,21 @@ internal class MinimalWavefrontParserTest {
             MinimalWavefrontParser(
                 MALFORMED_WAVEFRONT_FACE_VERTEX_INDEX_OUT_OF_RANGE.byteInputStream(),
                 false
-            ).parsedScene
+            ).parse()
         }
     }
 
     @Test
     fun `test malformed wavefront bad face vertex index`() {
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_FACE_VERTEX_INDEX.byteInputStream(), false).parsedScene
+            MinimalWavefrontParser(MALFORMED_WAVEFRONT_BAD_FACE_VERTEX_INDEX.byteInputStream(), false).parse()
         }
     }
 
     @Test
     fun `test malformed wavefront bad face vertex number`() {
         assertThrows<WavefrontParseException> {
-            MinimalWavefrontParser(MALFORMED_WAVEFRONT_WRONG_FACE_VERTEX_NUMBER.byteInputStream(), false).parsedScene
+            MinimalWavefrontParser(MALFORMED_WAVEFRONT_WRONG_FACE_VERTEX_NUMBER.byteInputStream(), false).parse()
         }
     }
 
