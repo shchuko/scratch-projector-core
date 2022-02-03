@@ -47,16 +47,25 @@ object ArgsParser {
             throw OptionsValidationException("Options class must be public")
         }
 
-        val descriptors = options.toDescriptors()
+        val annotatedProperties = options::class.declaredMemberProperties.filter { it.hasAnnotation<Option>() }.toList()
+
+        val nonPublicProperties = annotatedProperties.filterNot { it.visibility == KVisibility.PUBLIC }.map { it.name }
+        if (nonPublicProperties.isNotEmpty()) {
+            throw OptionsValidationException("Non-public fields are not supported", nonPublicProperties)
+        }
+
+        val immutableProperties = annotatedProperties.filterNot { it is KMutableProperty<*> }.map { it.name }
+        if (immutableProperties.isNotEmpty()) {
+            throw OptionsValidationException("Immutable fields are not supported", immutableProperties)
+        }
+
+        val descriptors = annotatedProperties.filterIsInstance<KMutableProperty<*>>().map { OptionDescriptor(it) }
 
         val unsupportedTypes = descriptors
             .filter { !it.isSupportedType() }
             .map { "$OPTION_PREFIX${it.alias} [${it.type}]" }
-
         if (unsupportedTypes.isNotEmpty()) {
-            throw OptionsValidationException(
-                "Options of unsupported types found: [${unsupportedTypes.joinToString(", ")}]"
-            )
+            throw OptionsValidationException("Options of unsupported types found", unsupportedTypes)
         }
 
         val duplicatedAliases = descriptors
@@ -65,11 +74,15 @@ object ArgsParser {
             .eachCount()
             .filter { it.value > 1 }
             .map { "$OPTION_PREFIX${it.key}" }
-
         if (duplicatedAliases.isNotEmpty()) {
-            throw OptionsValidationException(
-                "Duplicated aliases found: [${duplicatedAliases.joinToString(", ")}]"
-            )
+            throw OptionsValidationException("Duplicated aliases found", duplicatedAliases)
+        }
+
+        val boolWithRequired = descriptors
+            .filter { it.required && it.isBoolean }
+            .map { it.alias }
+        if (boolWithRequired.isNotEmpty()) {
+            throw OptionsValidationException("Required boolean properties doesn't make sense", boolWithRequired)
         }
     }
 
@@ -149,7 +162,6 @@ object ArgsParser {
             description = annotation.description
             required = annotation.required
         }
-
 
         fun setBoolean(options: Any) = setValue(options, true)
 
