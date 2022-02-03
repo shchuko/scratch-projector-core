@@ -20,33 +20,23 @@ object ArgsParser {
         parseInternal(options, args)
     }
 
-    fun help(options: Any, header: String? = null): String {
+    fun help(options: Any, header: String? = null, indentLen: Int = 2): String {
         val descriptors = options.toDescriptors()
         if (descriptors.isEmpty()) {
             return header ?: ""
         }
 
-        val padLength = descriptors.maxOf {
-            var len = it.alias.length + OPTION_PREFIX.length
-            len += if (it.required) REQUIRED_DESCRIPTION.length else 0
-            len += if (!it.isBoolean()) it.typeName.length + 3 else 0
-            len
-        } + 2
+        val padLength = descriptors.maxOf { it.helpPrefix.length }
 
         return buildString {
-            header?.let { appendLine(it) }
-            for (descriptor in descriptors) {
-                append(buildString {
-                    header?.let { append(" ") }
-                    append("$OPTION_PREFIX${descriptor.alias}")
-                    if (!descriptor.isBoolean()) {
-                        append(" [${descriptor.typeName}]")
-                    }
+            if (header != null) {
+                appendLine(header)
+            }
 
-                    if (descriptor.required) {
-                        append(REQUIRED_DESCRIPTION)
-                    }
-                }.padEnd(padLength))
+            for (descriptor in descriptors) {
+                append(" ".repeat(indentLen))
+                append(descriptor.helpPrefix.padEnd(padLength))
+                append("  ")
                 appendLine(descriptor.description)
             }
         }
@@ -105,7 +95,7 @@ object ArgsParser {
             val maybeAlias = token.drop(OPTION_PREFIX.length)
             val option = descriptors.find { it.alias == maybeAlias } ?: continue
 
-            if (!option.isBoolean()) {
+            if (!option.isBoolean) {
                 if (!iterator.hasNext()) {
                     throw ArgsParseException("Options $OPTION_PREFIX$maybeAlias has no value")
                 }
@@ -134,7 +124,7 @@ object ArgsParser {
             val maybeAlias = token.drop(OPTION_PREFIX.length)
             val option = descriptors.find { it.alias == maybeAlias } ?: continue
 
-            if (option.isBoolean()) {
+            if (option.isBoolean) {
                 option.setBoolean(options)
                 continue
             }
@@ -148,18 +138,10 @@ object ArgsParser {
         val description: String
         val required: Boolean
         var provided = false
-
         val type = property.returnType
-        val typeName = when (type) {
-            String::class.createType() -> "STR"
-            Byte::class.createType() -> "BYTE"
-            Short::class.createType() -> "SHORT"
-            Int::class.createType() -> "INT"
-            Long::class.createType() -> "LONG"
-            Float::class.createType() -> "FLOAT"
-            Double::class.createType() -> "DOUBLE"
-            else -> ""
-        }
+        val typeName by lazy { findTypeName() }
+        val isBoolean = type == Boolean::class.createType()
+        val helpPrefix by lazy { buildHelpPrefix() }
 
         init {
             val annotation = property.annotations.filterIsInstance<Option>().first()
@@ -168,7 +150,6 @@ object ArgsParser {
             required = annotation.required
         }
 
-        fun isBoolean(): Boolean = this.type == Boolean::class.createType()
 
         fun setBoolean(options: Any) = setValue(options, true)
 
@@ -185,16 +166,31 @@ object ArgsParser {
 
         fun isSupportedType(): Boolean {
             return when (type) {
-                String::class.createType(),
-                Byte::class.createType(),
-                Short::class.createType(),
-                Int::class.createType(),
-                Long::class.createType(),
-                Float::class.createType(),
-                Double::class.createType(),
-                Boolean::class.createType() -> true
+                String::class.createType(), Byte::class.createType(), Short::class.createType(), Int::class.createType(), Long::class.createType(), Float::class.createType(), Double::class.createType(), Boolean::class.createType() -> true
                 else -> false
             }
+        }
+
+        private fun buildHelpPrefix(): String = buildString {
+            append("$OPTION_PREFIX${alias}")
+            if (!isBoolean) {
+                append(" $typeName")
+            }
+
+            if (required) {
+                append(REQUIRED_DESCRIPTION)
+            }
+        }
+
+        private fun findTypeName(): String = when (type) {
+            String::class.createType() -> "STR"
+            Byte::class.createType() -> "BYTE"
+            Short::class.createType() -> "SHORT"
+            Int::class.createType() -> "INT"
+            Long::class.createType() -> "LONG"
+            Float::class.createType() -> "FLOAT"
+            Double::class.createType() -> "DOUBLE"
+            else -> ""
         }
 
         private fun parseValue(value: String): Any {
