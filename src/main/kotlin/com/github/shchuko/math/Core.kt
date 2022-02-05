@@ -1,6 +1,5 @@
 package com.github.shchuko.math
 
-import kotlin.math.abs
 import kotlin.math.sqrt
 
 typealias Vector3D = Triple<Double, Double, Double>
@@ -8,12 +7,6 @@ typealias Point3D = Triple<Double, Double, Double>
 
 typealias Vector2D = Pair<Double, Double>
 typealias Point2D = Pair<Double, Double>
-
-/* Double */
-// TODO check whether the delta suitable
-private infix fun Double.eq(other: Double): Boolean = abs(this - other) < 0.0001
-private infix fun Double.ge(other: Double): Boolean = this > other || eq(other)
-private fun Double.sqr() = this * this
 
 typealias Line2D = Pair<Point2D, Point2D>
 typealias Circle2D = Pair<Point2D, Double>
