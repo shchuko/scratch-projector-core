@@ -58,6 +58,7 @@ operator fun Triple<Double, Double, Double>.plus(other: Triple<Double, Double, D
 operator fun Triple<Double, Double, Double>.minus(other: Triple<Double, Double, Double>): Triple<Double, Double, Double> =
     Triple(first - other.first, second - other.second, third - other.third)
 
+fun Triple<Double, Double, Double>.isValidNumbers(): Boolean = first.isFinite() && second.isFinite() && third.isFinite()
 
 /* Vector 3D */
 val VEC_3D_0 = Vector3D(0.0, 0.0, 0.0)
@@ -134,6 +135,7 @@ operator fun Pair<Double, Double>.plus(other: Pair<Double, Double>): Pair<Double
 operator fun Pair<Double, Double>.minus(other: Pair<Double, Double>): Pair<Double, Double> =
     Pair(first - other.first, second - other.second)
 
+fun Pair<Double, Double>.isValidNumbers(): Boolean = first.isFinite() && second.isFinite()
 
 /* Vector 2D */
 val VEC_2D_0 = Vector2D(0.0, 0.0)
@@ -163,16 +165,33 @@ infix fun Point2D.move(vec: Vector2D): Point2D = Point2D(first + vec.first, seco
 
 fun Line2D.lineStart(): Point2D = first
 fun Line2D.lineEnd(): Point2D = second
+fun Line2D.isValidLine(): Boolean = lineStart().isValidNumbers() && lineEnd().isValidNumbers()
+fun Line2D.lineLength(): Double = (lineStart() vectorTo lineEnd()).size()
+fun Line2D.moveLine(vec: Vector2D): Line2D = Line2D(lineStart().move(vec), lineEnd().move(vec))
 
 /* Circle 2D */
 fun Circle2D.circleCenter(): Point2D = first
 fun Circle2D.circleRadius(): Double = second
-fun Circle2D.isValidCircle(): Boolean = this.circleRadius() > 0.0
+fun Circle2D.isValidCircle(): Boolean =
+    circleCenter().isValidNumbers() && circleRadius().isFinite() && circleRadius() > 0.0
+
+fun Circle2D.moveCircle(vec: Vector2D): Circle2D = Circle2D(circleCenter().move(vec), circleRadius())
 
 /* CircleArc2D */
 fun CircleArc2D.arcCircle(): Circle2D = first
 fun CircleArc2D.arcStart(): Point2D = second.first
 fun CircleArc2D.arcEnd(): Point2D = second.second
+fun CircleArc2D.isValidCircleArc(): Boolean = arcCircle().isValidCircle()
+        && arcStart().isValidNumbers()
+        && arcEnd().isValidNumbers()
+        && (arcCircle().circleCenter() to arcStart()).lineLength() eq circleRadius()
+        && (arcCircle().circleCenter() to arcEnd()).lineLength() eq circleRadius()
+
+fun CircleArc2D.moveCircleArc(vec: Vector2D): CircleArc2D = CircleArc2D(
+    arcCircle().moveCircle(vec),
+    Pair(arcStart().move(vec), arcEnd().move(vec)),
+    largeArcFlag()
+)
 
 /**
  * `largeArc=true`:
