@@ -47,7 +47,7 @@ class CanvasProcessor {
         isUsed = true
     }
 
-    fun getCanvasSize(padX: Double = 0.0, padY: Double = 0.0): Pair<Double, Double> {
+    fun getCanvasSize(padX: Double = 0.0, padY: Double = padX): Pair<Double, Double> {
         require(padX >= 0.0) { "padX must not be negative, got '$padX'" }
         require(padY >= 0.0) { "padY must not be negative, got '$padY'" }
         var xSize = 0.0
@@ -63,7 +63,7 @@ class CanvasProcessor {
         return Pair(xSize + padX * 2.0, ySize + padY * 2.0)
     }
 
-    fun getMoveVecToPositive(padX: Double = 0.0, padY: Double = 0.0): Vector2D {
+    fun getMoveVecToPositive(padX: Double = 0.0, padY: Double = padX): Vector2D {
         require(padX >= 0.0) { "padX must not be negative, got '$padX'" }
         require(padY >= 0.0) { "padY must not be negative, got '$padY'" }
 
