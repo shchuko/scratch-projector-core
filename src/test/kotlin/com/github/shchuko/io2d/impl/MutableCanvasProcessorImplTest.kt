@@ -1,18 +1,23 @@
-package com.github.shchuko.io2d
+package com.github.shchuko.io2d.impl
 
 import com.github.shchuko.math.*
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
-internal class CanvasProcessorTest {
+internal class MutableCanvasProcessorImplTest {
+
+    @Test
+    fun `test `() {
+
+    }
 
     @Test
     fun `test getCanvasSize throws on illegal args`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
         processor.getCanvasSize(0.0, 0.0)
 
         assertThrows<IllegalArgumentException> {
@@ -26,7 +31,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getCanvasSize on no objects returns zero`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
         val expected = Pair(0.0, 0.0)
         val actual = processor.getCanvasSize()
         assertPairEq(expected, actual)
@@ -34,7 +39,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getCanvasSize on no objects padding append`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val padX = 5.5
         val padY = 7.5
@@ -46,7 +51,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getCanvasSize with objects`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a = Point2D(1.1, -5.7)
         val b = Point2D(2.5, 8.1)
@@ -63,7 +68,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getCanvasSize with objects padding append`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a = Point2D(1.1, -5.7)
         val b = Point2D(2.5, 8.1)
@@ -83,7 +88,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getMoveVecToPositive throws on illegal args`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
         processor.getMoveVecToPositive(0.0, 0.0)
 
         assertThrows<IllegalArgumentException> {
@@ -97,13 +102,13 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getMoveVecToPositive no objects returns zero`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
         assertPairEq(Vector2D(0.0, 0.0), processor.getMoveVecToPositive())
     }
 
     @Test
     fun `test getMoveVecToPositive on no objects padding append`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val padX = 5.5
         val padY = 7.5
@@ -114,7 +119,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getMoveVecToPositive with objects`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a = Point2D(1.1, -5.7)
         val b = Point2D(2.5, 8.1)
@@ -131,7 +136,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test getMoveVecToPositive with objects and padding`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a = Point2D(1.1, -5.7)
         val b = Point2D(2.5, 8.1)
@@ -151,7 +156,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test processes line correctly`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a = Point2D(1.1, -5.7)
         val b = Point2D(2.5, 8.1)
@@ -168,7 +173,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test reset`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a1 = Point2D(1.1, -5.7)
         val b1 = Point2D(2.5, 8.1)
@@ -179,9 +184,9 @@ internal class CanvasProcessorTest {
         val maxY1 = 8.1
         val minY1 = -5.7
 
-        assertFalse(processor.isUsed)
+        assertTrue(processor.isEmpty())
         processor.processLine(line1)
-        assertTrue(processor.isUsed)
+        assertFalse(processor.isEmpty())
         validate(processor, maxX1, minX1, maxY1, minY1)
 
         processor.reset()
@@ -195,15 +200,15 @@ internal class CanvasProcessorTest {
         val maxY2 = 7.05
         val minY2 = 1.2
 
-        assertFalse(processor.isUsed)
+        assertTrue(processor.isEmpty())
         processor.processLine(line2)
-        assertTrue(processor.isUsed)
+        assertFalse(processor.isEmpty())
         validate(processor, maxX2, minX2, maxY2, minY2)
     }
 
     @Test
     fun `test processes two lines correctly`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a1 = Point2D(1.1, -5.7)
         val b1 = Point2D(2.5, 8.1)
@@ -231,7 +236,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test processes circle correctly`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val center = Point2D(1.5, -2.2)
         val radius = 2.5
@@ -248,7 +253,7 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test processes two circles correctly`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val center1 = Point2D(1.5, -2.2)
         val radius1 = 2.5
@@ -275,16 +280,14 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test processes circle arc correctly`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
         // TODO rewrite the test when circle arc processing is implemented property
-        val unusedA = Point2D(0.0, 0.0)
-        val unusedB = Point2D(0.0, 0.0)
-
         val center = Point2D(1.5, -2.2)
         val radius = 2.5
+        val arcStart = Point2D(center.x() + radius, center.y())
+        val arcEnd = Point2D(center.x(), center.y() + radius)
         val circle = Circle2D(center, radius)
-
-        val arc = CircleArc2D(circle, Pair(unusedA, unusedB), false)
+        val arc = CircleArc2D(circle, Pair(arcStart, arcEnd), false)
 
         val maxX = 4.0
         val minX = -1.0
@@ -297,21 +300,22 @@ internal class CanvasProcessorTest {
 
     @Test
     fun `test processes two circle arcs correctly`() {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         // TODO rewrite the test when circle arc processing is implemented property
-        val unusedA = Point2D(0.0, 0.0)
-        val unusedB = Point2D(0.0, 0.0)
-
         val center1 = Point2D(1.5, -2.2)
         val radius1 = 2.5
         val circle1 = Circle2D(center1, radius1)
-        val arc1 = CircleArc2D(circle1, Pair(unusedA, unusedB), false)
+        val arc1Start = Point2D(center1.x() + radius1, center1.y())
+        val arc1End = Point2D(center1.x(), center1.y() + radius1)
+        val arc1 = CircleArc2D(circle1, Pair(arc1Start, arc1End), false)
 
         val center2 = Point2D(-1.5, 2.2)
         val radius2 = 0.5
         val circle2 = Circle2D(center2, radius2)
-        val arc2 = CircleArc2D(circle2, Pair(unusedA, unusedB), false)
+        val arc2Start = Point2D(center2.x() + radius2, center2.y())
+        val arc2End = Point2D(center2.x(), center2.y() + radius2)
+        val arc2 = CircleArc2D(circle2, Pair(arc2Start, arc2End), false)
 
         val maxX = 4.0
         val minX = -2.0
@@ -338,7 +342,7 @@ internal class CanvasProcessorTest {
         "ARC, LINE, CIRCLE",
     )
     fun `test processes line circle and arc correctly`(first: String, second: String, third: String) {
-        val processor = CanvasProcessor()
+        val processor = MutableCanvasProcessorImpl()
 
         val a = Point2D(1.1, -5.7)
         val b = Point2D(2.5, 0.1)
@@ -349,13 +353,12 @@ internal class CanvasProcessorTest {
         val circle = Circle2D(circleCenter, circleRadius)
 
         // TODO rewrite the test when circle arc processing is implemented property
-        val unusedA = Point2D(0.0, 0.0)
-        val unusedB = Point2D(0.0, 0.0)
-
         val arcCenter = Point2D(-1.5, 2.2)
         val arcRadius = 0.5
         val arcCircle = Circle2D(arcCenter, arcRadius)
-        val arc = CircleArc2D(arcCircle, Pair(unusedA, unusedB), false)
+        val arcStart = Point2D(arcCenter.x() + arcRadius, arcCenter.y())
+        val arcEnd = Point2D(arcCenter.x(), arcCenter.y() + arcRadius)
+        val arc = CircleArc2D(arcCircle, Pair(arcStart, arcEnd), false)
 
         val maxX = 4.0
         val minX = -2.0
@@ -383,13 +386,13 @@ internal class CanvasProcessorTest {
     }
 
     private fun validate(
-        processor: CanvasProcessor,
+        processor: MutableCanvasProcessorImpl,
         maxX: Double,
         minX: Double,
         maxY: Double,
         minY: Double,
         padX: Double? = null,
-        padY: Double? = null
+        padY: Double? = null,
     ) {
         require(padX == null && padY == null || padX != null && padY != null)
         require(padX == null || padX >= 0.0)
@@ -431,14 +434,14 @@ internal class CanvasProcessorTest {
     private inline fun assertDoubleEq(
         expected: Double,
         actual: Double,
-        lazyMessage: () -> String = { "Expected $expected but was: $actual" }
+        lazyMessage: () -> String = { "Expected $expected but was: $actual" },
     ) = assertTrue(expected eq actual, lazyMessage())
 
 
     private inline fun assertPairEq(
         expected: Pair<Double, Double>,
         actual: Pair<Double, Double>,
-        lazyMessage: () -> String = { "Expected $expected but was: $actual" }
+        lazyMessage: () -> String = { "Expected $expected but was: $actual" },
     ) = assertTrue(expected eq actual, lazyMessage())
 
 }
